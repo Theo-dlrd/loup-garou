@@ -1116,6 +1116,22 @@ int verifAmour(mort_t * mortNuit){
     return -1;
 }
 
+SDL_Surface * LoadIMGFromRole(joueur_t * joueur){
+    switch(joueur->role){
+        case NONE : break;
+        case LOUPGAROU : return IMG_Load("../img/loup-garou.png");
+        case VILLAGEOIS : return IMG_Load("../img/villageois.png");
+        case CHASSEUR : return IMG_Load("../img/chasseur.png");
+        case VOYANTE : return IMG_Load("../img/voyante.png");
+        case CUPIDON : return IMG_Load("../img/cupidon.png");
+        case SORCIERE : return IMG_Load("../img/sorciere.png");
+        case PETITEFILLE : return IMG_Load("../img/petite-fille.png");
+        case VOLEUR : return IMG_Load("../img/voleur.png");
+        default : break;
+    }
+    return NULL;
+}
+
 void affMorts(jeu_t * jeu, SDL_Renderer * renderer, TTF_Font *font, mort_t * mortNuit){
 
     SDL_Surface *info = NULL; 
@@ -1303,19 +1319,43 @@ void affMorts(jeu_t * jeu, SDL_Renderer * renderer, TTF_Font *font, mort_t * mor
     while(delay<20000){
         delay = SDL_GetTicks() - tick;
 
+        if(delay >= 10000 && delay <= 10500){
+            if(mortNuit->iNbMort>=1){
+                SDL_DestroyTexture(txr_img_mort1);
+                img_mort1 = LoadIMGFromRole(mortNuit->tab_mort[0]);
+                txr_img_mort1 = SDL_CreateTextureFromSurface(renderer, img_mort1);
+                SDL_FreeSurface(img_mort1);
+            }
+            if(mortNuit->iNbMort>=2){
+                SDL_DestroyTexture(txr_img_mort2);
+                img_mort2 = LoadIMGFromRole(mortNuit->tab_mort[1]);
+                txr_img_mort2 = SDL_CreateTextureFromSurface(renderer, img_mort2);
+                SDL_FreeSurface(img_mort2);
+            }
+            if(mortNuit->iNbMort>=3){
+                SDL_DestroyTexture(txr_img_mort3);
+                img_mort3 = LoadIMGFromRole(mortNuit->tab_mort[2]);
+                txr_img_mort3 = SDL_CreateTextureFromSurface(renderer, img_mort3);
+                SDL_FreeSurface(img_mort3);
+            }
+        }
+
         
         SDL_SetRenderDrawColor(renderer,149,56,58,255);
         SDL_RenderClear(renderer);
         if(mortNuit->iNbMort>=1){
             SDL_RenderCopy(renderer, txr_img_mort1, NULL, &rect_img_mort1);
-            SDL_RenderCopy(renderer, txr_mort1, NULL, &rect_mort1);
+            if(delay>10000)
+                SDL_RenderCopy(renderer, txr_mort1, NULL, &rect_mort1);
         }
         if(mortNuit->iNbMort>=2){
-            SDL_RenderCopy(renderer, txr_mort2, NULL, &rect_mort2);
+            if(delay>10000)
+                SDL_RenderCopy(renderer, txr_mort2, NULL, &rect_mort2);
             SDL_RenderCopy(renderer, txr_img_mort2, NULL, &rect_img_mort2);
         }
         if(mortNuit->iNbMort>=3){
-            SDL_RenderCopy(renderer, txr_mort3, NULL, &rect_mort3);
+            if(delay>10000)
+                SDL_RenderCopy(renderer, txr_mort3, NULL, &rect_mort3);
             SDL_RenderCopy(renderer, txr_img_mort3, NULL, &rect_img_mort3);
         }
         SDL_RenderCopy(renderer, txr_ok, NULL, &rect_ok);
