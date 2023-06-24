@@ -1692,7 +1692,7 @@ int initJeu(jeu_t * jeu, SDL_Renderer * renderer, TTF_Font * font){
     return 1;
 }
 
-int victoire_LG(jeu_t * jeu){
+int verif_vict_LG(jeu_t * jeu){
     for(int i=0; i<jeu->nbJoueur; i++){
         if(jeu->joueurs[i].role != LOUPGAROU && jeu->joueurs[i].etat == VIVANT && trouverVoleur(jeu)==-1){
             return 0;
@@ -1701,34 +1701,39 @@ int victoire_LG(jeu_t * jeu){
     return 1;
 }
 
-int victoire_village(jeu_t * jeu){
+int verif_vict_village(jeu_t * jeu){
     for(int i=0; i<jeu->nbJoueur; i++){
         if(jeu->joueurs[i].role == LOUPGAROU && jeu->joueurs[i].etat == VIVANT){
             return 0;
         }
     }
-    return 2;
+    return 1;
 }
 
 
-int victoire_amour(jeu_t * jeu){
-    int nbAmour = 0;
+int verif_vict_amour(jeu_t * jeu){
+    joueur_t ** amoureux = malloc(sizeof(joueur_t*)*2);
+    int iAmour=0;
     for(int i=0; i<jeu->nbJoueur; i++){
         if((jeu->joueurs[i].statut[0] == AMOUREUX || jeu->joueurs[i].statut[1] == AMOUREUX) && jeu->joueurs[i].etat == VIVANT){
-            nbAmour++;
+            amoureux[iAmour++] = &jeu->joueurs[i];
         }
     }
-    if(nbAmour==2){
+    if(iAmour==2){
         int nbVivant = 0;
         for(int i=0; i<jeu->nbJoueur; i++){
             if(jeu->joueurs[i].etat == VIVANT){
                 nbVivant++;
             }
         }
-        if(nbAmour == nbVivant){
-            return 3;
+        if(iAmour == nbVivant && ((amoureux[0]->role == LOUPGAROU && amoureux[1]->role != LOUPGAROU)||(amoureux[1]->role == LOUPGAROU && amoureux[0]->role != LOUPGAROU))){
+            free(amoureux);
+            amoureux = NULL;
+            return 1;
         }
     }
+    free(amoureux);
+    amoureux = NULL;
     return 0;
 }
 
@@ -1737,14 +1742,14 @@ int play(jeu_t * jeu, SDL_Renderer * renderer, TTF_Font * font){
     int victoire = 1;
     int tour = 0;
 
-    while(!victoire_amour(jeu) && !victoire_LG(jeu) && !victoire_village(jeu)){
+    while(!verif_vict_amour(jeu) && !verif_vict_LG(jeu) && !verif_vict_village(jeu)){
         tour++;
         mort_t * mortNuit = malloc(sizeof(mort_t));
         mortNuit->iNbMort = 0;
         mortNuit->tab_mort = malloc(sizeof(joueur_t*)*3);
 
         nuit(tour, jeu, renderer, font, mortNuit);
-        if(!victoire_amour(jeu) && !victoire_LG(jeu) && !victoire_village(jeu)){
+        if(!verif_vict_amour(jeu) && !verif_vict_LG(jeu) && !verif_vict_village(jeu)){
             jour(jeu, renderer, font, mortNuit);
         }
 
@@ -1754,13 +1759,13 @@ int play(jeu_t * jeu, SDL_Renderer * renderer, TTF_Font * font){
         mortNuit = NULL;
     }
 
-    if(victoire_amour(jeu)){
+    if(verif_vict_amour(jeu)){
         printf("Victoire des amoureux !\n");
     }
-    else if(victoire_LG(jeu)){
+    else if(verif_vict_LG(jeu)){
         printf("Victoire des loups garous !\n");
     }
-    else if(victoire_village(jeu)){
+    else if(verif_vict_village(jeu)){
         printf("Victoire des Villageois !\n");
     }
     
