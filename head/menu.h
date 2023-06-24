@@ -4,6 +4,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
+#include "../head/regles.h"
 #include "../head/role.h"
 #include "../head/main.h"
 

@@ -1,5 +1,3 @@
-/*
-#include "../head/role.h"
 
 roles_t roles[15]={
 	{"Villageois","Aucun","Éliminer tous les Loup Garous."},
@@ -18,4 +16,3 @@ roles_t roles[15]={
 	{"Grand Méchant Loup", "Tant qu'aucun loup n'est port, désigne une seconde victime chaque nuit", "Éliminer tous les villageois"},
 	{"Enfant Sauvage", "Se choisit un idole. Si celui ci meurt, il se transformera en loup garou", "Éliminer tous les Loup Garous"}
 };
-*/

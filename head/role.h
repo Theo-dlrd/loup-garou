@@ -44,12 +44,4 @@ typedef struct jeu_s{
     int potionsSorciere[2];     /* potionSorciere[0] : vie, potionSorciere[1] : mort */
 }jeu_t;
 
-char explication1[200];
-char explication2[200];
-char explication3[200];
-
-char obj1[100];
-char obj2[100];
-char obj3[200];
-
 #endif

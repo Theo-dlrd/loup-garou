@@ -158,6 +158,7 @@ char * menu_nom(SDL_Renderer* renderer, TTF_Font* font, int indice, jeu_t * jeu)
 
 
 int rules_menu(SDL_Renderer* renderer, TTF_Font* font){
+    Regles * regles = initRegles();
     SDL_Surface *title = TTF_RenderUTF8_Solid(font, "Règles du jeu", blackColor);
     SDL_Texture *txr_title = SDL_CreateTextureFromSurface(renderer, title);
     Element title_place = {LONG_WIN*1/2, 0, 200, 75};
@@ -170,32 +171,32 @@ int rules_menu(SDL_Renderer* renderer, TTF_Font* font){
     SDL_Rect rect_back = {back_button.x-back_button.longueur/2, back_button.y-back_button.largeur, back_button.longueur, back_button.largeur};
     SDL_FreeSurface(back);
 
-    SDL_Surface *expl1 = TTF_RenderUTF8_Solid(font, explication1, blackColor);
+    SDL_Surface *expl1 = TTF_RenderUTF8_Solid(font, regles->explications[0], blackColor);
     SDL_Texture *txr_expl1 = SDL_CreateTextureFromSurface(renderer, expl1);
     SDL_Rect rect_expl1 = {100, LARG_WIN*3/20-20, 703, 40};
     SDL_FreeSurface(expl1);
 
-    SDL_Surface *expl2 = TTF_RenderUTF8_Solid(font, explication2, blackColor);
+    SDL_Surface *expl2 = TTF_RenderUTF8_Solid(font, regles->explications[1], blackColor);
     SDL_Texture *txr_expl2 = SDL_CreateTextureFromSurface(renderer, expl2);
     SDL_Rect rect_expl2 = {100, rect_expl1.y+rect_expl1.h, 827, 40};
     SDL_FreeSurface(expl2);
 
-    SDL_Surface *expl3 = TTF_RenderUTF8_Solid(font, explication3, blackColor);
+    SDL_Surface *expl3 = TTF_RenderUTF8_Solid(font, regles->explications[2], blackColor);
     SDL_Texture *txr_expl3 = SDL_CreateTextureFromSurface(renderer, expl3);
     SDL_Rect rect_expl3 = {100, rect_expl2.y+rect_expl2.h, 1000, 40};
     SDL_FreeSurface(expl3);
 
-    SDL_Surface *but1 = TTF_RenderUTF8_Solid(font, obj1, blackColor);
+    SDL_Surface *but1 = TTF_RenderUTF8_Solid(font, regles->obj[0], blackColor);
     SDL_Texture *txr_but1 = SDL_CreateTextureFromSurface(renderer, but1);
     SDL_Rect rect_but1 = {50, LARG_WIN*14/20, 900, 40};
     SDL_FreeSurface(but1);
 
-    SDL_Surface *but2 = TTF_RenderUTF8_Solid(font, obj2, blackColor);
+    SDL_Surface *but2 = TTF_RenderUTF8_Solid(font, regles->obj[1], blackColor);
     SDL_Texture *txr_but2 = SDL_CreateTextureFromSurface(renderer, but2);
     SDL_Rect rect_but2 = {50, rect_but1.y+rect_but1.h, 800, 40};
     SDL_FreeSurface(but2);
 
-    SDL_Surface *but3 = TTF_RenderUTF8_Solid(font, obj3, blackColor);
+    SDL_Surface *but3 = TTF_RenderUTF8_Solid(font, regles->obj[2], blackColor);
     SDL_Texture *txr_but3 = SDL_CreateTextureFromSurface(renderer, but3);
     SDL_Rect rect_but3 = {50, rect_but2.y+rect_but2.h, 1100, 40};
     SDL_FreeSurface(but3);
@@ -385,6 +386,7 @@ int rules_menu(SDL_Renderer* renderer, TTF_Font* font){
     SDL_DestroyTexture(txr_desc_pf);
     SDL_DestroyTexture(txr_vo);
     SDL_DestroyTexture(txr_desc_vo);
+    destroyRegles(regles);
     
     return 0;
 }
@@ -430,6 +432,7 @@ jeu_t* online_menu(SDL_Renderer* renderer, TTF_Font* font){
             }
         }
     }
+
     SDL_DestroyTexture(txr_back);
     SDL_DestroyTexture(txr_coming);
 
