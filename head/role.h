@@ -27,6 +27,7 @@ typedef struct joueur_s{
 typedef struct mort_s{
     int iNbMort;
     joueur_t ** tab_mort;
+    Roles * role_tueur;
 }mort_t;
 
 typedef struct jeu_s{

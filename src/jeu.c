@@ -1032,11 +1032,13 @@ int nuit(int tour, jeu_t * jeu, SDL_Renderer * renderer, TTF_Font *font, mort_t 
 
         retour = tourSorciere(jeu, renderer, font, mortNuit->tab_mort[0]);
         if(retour >= -1){
-            mortNuit->tab_mort[mortNuit->iNbMort++]->etat = MORT;
+            mortNuit->tab_mort[mortNuit->iNbMort]->etat = MORT;
+            mortNuit->role_tueur[mortNuit->iNbMort++] = LOUPGAROU;
         }
         if(retour >= 0){
             mortNuit->tab_mort[mortNuit->iNbMort] = &jeu->joueurs[retour];
-            mortNuit->tab_mort[mortNuit->iNbMort++]->etat = MORT;
+            mortNuit->tab_mort[mortNuit->iNbMort]->etat = MORT;
+            mortNuit->role_tueur[mortNuit->iNbMort++] = SORCIERE;
         }
 
         Mix_Chunk * sorciere_som = Mix_LoadWAV("../sound/voice/sorciere_som.wav");
@@ -1049,7 +1051,8 @@ int nuit(int tour, jeu_t * jeu, SDL_Renderer * renderer, TTF_Font *font, mort_t 
 
     }
     else{
-        mortNuit->tab_mort[mortNuit->iNbMort++]->etat = MORT;
+        mortNuit->tab_mort[mortNuit->iNbMort]->etat = MORT;
+        mortNuit->role_tueur[mortNuit->iNbMort++] = LOUPGAROU;
     }
 
     tick = SDL_GetTicks();
@@ -1099,7 +1102,8 @@ int chercherAutreAmour(jeu_t * jeu, int numAmour1, mort_t * mortNuit){
     for(int i=0; i<jeu->nbJoueur; i++){
         if(jeu->joueurs[i].num != numAmour1 && jeu->joueurs[i].etat == VIVANT && (jeu->joueurs[i].statut[0] == AMOUREUX || jeu->joueurs[i].statut[1] == AMOUREUX)){
             jeu->joueurs[i].etat = MORT;
-            mortNuit->tab_mort[mortNuit->iNbMort++] = &jeu->joueurs[i];
+            mortNuit->tab_mort[mortNuit->iNbMort] = &jeu->joueurs[i];
+            mortNuit->role_tueur[mortNuit->iNbMort++] = CUPIDON;
             return 1;
         }
     }
@@ -1138,11 +1142,6 @@ void affMorts(jeu_t * jeu, SDL_Renderer * renderer, TTF_Font *font, mort_t * mor
     SDL_Texture *txr_info;
     SDL_Rect rect_info;
 
-   SDL_Surface *ok = TTF_RenderUTF8_Solid(font, "OK !", blackColor);
-    SDL_Texture *txr_ok = SDL_CreateTextureFromSurface(renderer, ok);
-    SDL_Rect rect_ok= {LONG_WIN*1/2-50, LARG_WIN-75, 100, 75};
-    SDL_FreeSurface(ok);
-
     SDL_Surface *img_mort1; 
     SDL_Texture *txr_img_mort1;
     SDL_Rect rect_img_mort1;
@@ -1150,6 +1149,7 @@ void affMorts(jeu_t * jeu, SDL_Renderer * renderer, TTF_Font *font, mort_t * mor
     SDL_Surface *mort1; 
     SDL_Texture *txr_mort1;
     SDL_Rect rect_mort1;
+    
 
     SDL_Surface *img_mort2; 
     SDL_Texture *txr_img_mort2;
@@ -1172,6 +1172,75 @@ void affMorts(jeu_t * jeu, SDL_Renderer * renderer, TTF_Font *font, mort_t * mor
     int numAmour1;
     if((numAmour1 = verifAmour(mortNuit)) != -1){
         chercherAutreAmour(jeu, numAmour1, mortNuit);
+    }
+
+    SDL_Surface *tueur1 = NULL; 
+    SDL_Texture * txr_tueur1;
+    SDL_Rect rect_tueur1;
+    rect_tueur1.x = rect_img_mort1.x;
+    rect_tueur1.y = rect_mort1.y+rect_mort1.h;
+    rect_tueur1.h = rect_mort1.h-10;
+    if(mortNuit->iNbMort>0 && mortNuit->role_tueur[0] == LOUPGAROU){
+        tueur1 = TTF_RenderUTF8_Solid(font, "Tué par les LOUPS-GAROUS", whiteColor);
+        rect_tueur1.w = 300;
+    }
+    else if(mortNuit->iNbMort>0 && mortNuit->role_tueur[0] == SORCIERE){
+        tueur1 = TTF_RenderUTF8_Solid(font, "Tué par la SORCIERE", whiteColor);
+        rect_tueur1.w = 200;
+    }
+    else if(mortNuit->iNbMort>0 && mortNuit->role_tueur[0] == CUPIDON){
+        tueur1 = TTF_RenderUTF8_Solid(font, "Tué par AMOUR", whiteColor);
+        rect_tueur1.w = 150;
+    }
+    if(tueur1 != NULL){
+        txr_tueur1 = SDL_CreateTextureFromSurface(renderer, tueur1);
+        SDL_FreeSurface(tueur1);
+    }
+
+    SDL_Surface *tueur2 = NULL; 
+    SDL_Texture * txr_tueur2;
+    SDL_Rect rect_tueur2;
+    rect_tueur2.x = rect_img_mort2.x;
+    rect_tueur2.y = rect_mort2.y+rect_mort2.h;
+    rect_tueur2.h = rect_mort2.h-10;
+    if(mortNuit->iNbMort>1 && mortNuit->role_tueur[1] == LOUPGAROU){
+        tueur2 = TTF_RenderUTF8_Solid(font, "Tué par les LOUPS-GAROUS", whiteColor);
+        rect_tueur2.w = 300;
+    }
+    else if(mortNuit->iNbMort>1 && mortNuit->role_tueur[1] == SORCIERE){
+        tueur2 = TTF_RenderUTF8_Solid(font, "Tué par la SORCIERE", whiteColor);
+        rect_tueur2.w = 200;
+    }
+    else if(mortNuit->iNbMort>1 && mortNuit->role_tueur[1] == CUPIDON){
+        tueur2 = TTF_RenderUTF8_Solid(font, "Tué par AMOUR", whiteColor);
+        rect_tueur2.w = 150;
+    }
+    if(tueur2 != NULL){
+        txr_tueur2 = SDL_CreateTextureFromSurface(renderer, tueur2);
+        SDL_FreeSurface(tueur2);
+    }
+
+    SDL_Surface *tueur3 = NULL; 
+    SDL_Texture * txr_tueur3;
+    SDL_Rect rect_tueur3;
+    rect_tueur3.x = rect_img_mort3.x;
+    rect_tueur3.y = rect_mort3.y+rect_mort3.h;
+    rect_tueur3.h = rect_mort3.h-10;
+    if(mortNuit->iNbMort>2 && mortNuit->role_tueur[2] == LOUPGAROU){
+        tueur3 = TTF_RenderUTF8_Solid(font, "Tué par les LOUPS-GAROUS", whiteColor);
+        rect_tueur3.w = 300;
+    }
+    else if(mortNuit->iNbMort>2 && mortNuit->role_tueur[2] == SORCIERE){
+        tueur3 = TTF_RenderUTF8_Solid(font, "Tué par la SORCIERE", whiteColor);
+        rect_tueur3.w = 200;
+    }
+    else if(mortNuit->iNbMort>2 && mortNuit->role_tueur[2] == CUPIDON){
+        tueur3 = TTF_RenderUTF8_Solid(font, "Tué par AMOUR", whiteColor);
+        rect_tueur3.w = 150;
+    }
+    if(tueur1 != NULL){
+        txr_tueur3 = SDL_CreateTextureFromSurface(renderer, tueur3);
+        SDL_FreeSurface(tueur3);
     }
 
     if(mortNuit->iNbMort == 0){
@@ -1316,10 +1385,10 @@ void affMorts(jeu_t * jeu, SDL_Renderer * renderer, TTF_Font *font, mort_t * mor
     int run = 1;
     int tick = SDL_GetTicks();
     int delay = SDL_GetTicks() - tick;
-    while(delay<20000){
+    while(delay<17000){
         delay = SDL_GetTicks() - tick;
 
-        if(delay >= 10000 && delay <= 10500){
+        if(delay >= 7000 && delay <= 8000){
             if(mortNuit->iNbMort>=1){
                 SDL_DestroyTexture(txr_img_mort1);
                 img_mort1 = LoadIMGFromRole(mortNuit->tab_mort[0]);
@@ -1344,26 +1413,29 @@ void affMorts(jeu_t * jeu, SDL_Renderer * renderer, TTF_Font *font, mort_t * mor
         SDL_SetRenderDrawColor(renderer,149,56,58,255);
         SDL_RenderClear(renderer);
         if(mortNuit->iNbMort>=1){
-            SDL_RenderCopy(renderer, txr_img_mort1, NULL, &rect_img_mort1);
-            if(delay>10000)
+            if(delay>7000){
                 SDL_RenderCopy(renderer, txr_mort1, NULL, &rect_mort1);
+                SDL_RenderCopy(renderer, txr_tueur1, NULL, &rect_tueur1);
+            }   
+            SDL_RenderCopy(renderer, txr_img_mort1, NULL, &rect_img_mort1);
+            
         }
         if(mortNuit->iNbMort>=2){
-            if(delay>10000)
+            if(delay>7000){
                 SDL_RenderCopy(renderer, txr_mort2, NULL, &rect_mort2);
+                SDL_RenderCopy(renderer, txr_tueur2, NULL, &rect_tueur2);
+            }
             SDL_RenderCopy(renderer, txr_img_mort2, NULL, &rect_img_mort2);
         }
         if(mortNuit->iNbMort>=3){
-            if(delay>10000)
+            if(delay>7000){
                 SDL_RenderCopy(renderer, txr_mort3, NULL, &rect_mort3);
+                SDL_RenderCopy(renderer, txr_tueur3, NULL, &rect_tueur3);
+            }
             SDL_RenderCopy(renderer, txr_img_mort3, NULL, &rect_img_mort3);
         }
-        SDL_RenderCopy(renderer, txr_ok, NULL, &rect_ok);
-        SDL_RenderCopy(renderer, txr_info, NULL, &rect_info);
-        SDL_RenderPresent(renderer);
     }
     SDL_DestroyTexture(txr_info);
-    SDL_DestroyTexture(txr_ok);
     if(mortNuit->iNbMort>=1){
         SDL_DestroyTexture(txr_img_mort1);
         SDL_DestroyTexture(txr_mort1);
@@ -1379,8 +1451,9 @@ void affMorts(jeu_t * jeu, SDL_Renderer * renderer, TTF_Font *font, mort_t * mor
 }
 
 void jour(jeu_t * jeu, SDL_Renderer * renderer, TTF_Font *font, mort_t * mortNuit){
+    printf("début du jour\n");
     affMorts(jeu, renderer, font, mortNuit);
-
+    printf("Fin du jour\n");
     /*
     if(mortNuit->tab_mort[0]->role == CHASSEUR || mortNuit->tab_mort[1]->role == CHASSEUR || mortNuit->tab_mort[2]->role == CHASSEUR){
         tourChasseur(jeu, renderer, font);
@@ -1787,12 +1860,15 @@ int play(jeu_t * jeu, SDL_Renderer * renderer, TTF_Font * font){
         mort_t * mortNuit = malloc(sizeof(mort_t));
         mortNuit->iNbMort = 0;
         mortNuit->tab_mort = malloc(sizeof(joueur_t*)*3);
+        mortNuit->role_tueur = malloc(sizeof(Roles)*3);
 
         nuit(tour, jeu, renderer, font, mortNuit);
         if(!verif_vict_amour(jeu) && !verif_vict_LG(jeu) && !verif_vict_village(jeu)){
             jour(jeu, renderer, font, mortNuit);
         }
 
+        free(mortNuit->role_tueur);
+        mortNuit->role_tueur = NULL;
         free(mortNuit->tab_mort);
         mortNuit->tab_mort = NULL;
         free(mortNuit);
