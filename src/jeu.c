@@ -1434,6 +1434,7 @@ void affMorts(jeu_t * jeu, SDL_Renderer * renderer, TTF_Font *font, mort_t * mor
             }
             SDL_RenderCopy(renderer, txr_img_mort3, NULL, &rect_img_mort3);
         }
+        SDL_RenderPresent(renderer);
     }
     SDL_DestroyTexture(txr_info);
     if(mortNuit->iNbMort>=1){
