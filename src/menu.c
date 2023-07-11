@@ -17,6 +17,124 @@ int name_available(char * nom, jeu_t * jeu, int i){
     return 1;
 }
 
+void * affAllPlayer(SDL_Renderer* renderer, TTF_Font* font, jeu_t * jeu){
+    int ligne=1, nbLigne, iCol=0, ecart;
+    int nbNonLoup = jeu->nbJoueur-jeu->nbLoupGarou;
+    if(nbNonLoup >= 1 && nbNonLoup <= 6){
+        nbLigne = 1;
+        ecart = 0;
+    }
+    if(nbNonLoup > 6 && nbNonLoup <= 12){
+        nbLigne = 2;
+        ecart = 200;
+    }
+    else if(nbNonLoup > 12 && nbNonLoup <= 18){
+        nbLigne = 3;
+        ecart = 200;
+    }
+    else if(nbNonLoup > 18 && nbNonLoup <= 24){
+        nbLigne = 4;
+        ecart = 175;
+    }
+    
+
+    SDL_Surface *title = TTF_RenderUTF8_Solid(font, "Les joueurs", whiteColor);
+    SDL_Texture *txr_title = SDL_CreateTextureFromSurface(renderer, title);
+    SDL_Rect rect_title = {LONG_WIN/2 - 150, 10, 200, 100};
+    SDL_FreeSurface(title);
+
+    SDL_Surface *begin = TTF_RenderUTF8_Solid(font, "Commencer !", whiteColor);
+    SDL_Texture *txr_begin = SDL_CreateTextureFromSurface(renderer, begin);
+    SDL_Rect rect_begin = {LONG_WIN/2 + 37, LARG_WIN-75, 150, 75};
+    SDL_FreeSurface(begin);
+
+    SDL_Surface *quit = TTF_RenderUTF8_Solid(font, "Quitter", whiteColor);
+    SDL_Texture *txr_quit = SDL_CreateTextureFromSurface(renderer, quit);
+    SDL_Rect rect_quit = {LONG_WIN/2 - 150, LARG_WIN-75, 100, 75};
+    SDL_FreeSurface(menu);
+
+    SDL_Surface *tab_noms[jeu->nbJoueur];
+    SDL_Surface *tab_role[jeu->nbJoueur];
+    SDL_Texture *tab_txr_noms[jeu->nbJoueur];
+    SDL_Texture *tab_txr_role[jeu->nbJoueur];
+    SDL_Rect tab_rect_nom[jeu->nbJoueur];
+    SDL_Rect tab_rect_role[jeu->nbJoueur];
+
+    int j=0;
+    for(int i=0; i<jeu->nbJoueur; i++){
+        tab_noms[j] = TTF_RenderUTF8_Solid(font, jeu->joueurs[i].nom, whiteColor);
+        tab_txr_noms[j] = SDL_CreateTextureFromSurface(renderer, tab_noms[j]);
+        tab_rect_nom[j].x = LONG_WIN*(2+3*iCol++)/20-strlen(jeu->joueurs[i].nom)*10+20;
+        if(ligne>1){
+            tab_rect_nom[j].y = LARG_WIN/(nbLigne+1)+(ligne-1)*ecart-50;
+        }
+        else{
+            tab_rect_nom[j].y = LARG_WIN/(nbLigne+1)-50;
+        }
+        tab_rect_nom[j].w = strlen(jeu->joueurs[i].nom)*20;
+        tab_rect_nom[j].h = 40;
+        SDL_FreeSurface(tab_noms[j]);
+
+        tab_role[j] = IMG_Load(jeu->joueurs[i].nomIMG);
+        tab_txr_role[j] = SDL_CreateTextureFromSurface(renderer, tab_role[j]);
+        tab_rect_role[j].w = 100;
+        tab_rect_role[j].h = 100;
+        tab_rect_role[j].x = tab_rect_nom[j].x + tab_rect_nom[j].w/2 - 50;
+        tab_rect_role[j].y = tab_rect_nom[j].y + tab_rect_nom[j].h+5;
+        SDL_FreeSurface(tab_role[j]);
+
+        if(j%6==5){
+            ligne++;
+            iCol=0;
+        }
+        j++;
+    }
+
+    int x,y;
+    int retour = 0;
+    int run = 1;
+    while(run){
+        SDL_Event event;
+        while(SDL_PollEvent(&event)){
+            switch(event.type){
+                case SDL_QUIT:
+                    run = 0;
+                    break;
+                case SDL_MOUSEBUTTONUP:
+                    SDL_GetMouseState(&x, &y);
+                    if(x>=rect_begin.x && x<=rect_begin.x+rect_begin.w && y>=rect_rejouer.y && y<=rect_rejouer.y+rect_rejouer.h){
+                        retour = 1;
+                        run = 0;
+                    }
+                    else if(x>=rect_menu.x && x<=rect_menu.x+rect_menu.w && y>=rect_menu.y && y<=rect_menu.y+rect_menu.h){
+                        retour = 0;
+                        run = 0;
+                    }
+            }
+        }
+        SDL_SetRenderDrawColor(renderer,149,56,58,255);
+        SDL_RenderClear(renderer);
+        SDL_RenderCopy(renderer, txr_title, NULL, &rect_title);
+        SDL_RenderCopy(renderer, txr_begin, NULL, &rect_begin);
+        SDL_RenderCopy(renderer, txr_quit, NULL, &rect_quit);
+        for(int i=0; i<jeu->nbJoueur; i++){
+            SDL_RenderCopy(renderer, tab_txr_noms[i], NULL, &tab_rect_nom[i]);
+            SDL_RenderCopy(renderer, tab_txr_role[i], NULL, &tab_rect_role[i]);
+        }
+        SDL_RenderPresent(renderer);
+    }
+    SDL_DestroyTexture(txr_title);
+    SDL_DestroyTexture(txr_begin);
+    SDL_DestroyTexture(txr_quit);
+    for(int i=0; i<jeu->nbJoueur; i++){
+        SDL_DestroyTexture(tab_txr_noms[i]);
+        SDL_DestroyTexture(tab_txr_role[i]);
+    }
+
+    Mix_FadeOutMusic(2000);
+    while(Mix_PlayingMusic());
+}
+
 char * menu_nom(SDL_Renderer* renderer, TTF_Font* font, int indice, jeu_t * jeu){
     char * strNumJoueur = malloc(sizeof(char)*20);
     sprintf(strNumJoueur, "Joueur n°%d : ", indice+1);

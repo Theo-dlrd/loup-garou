@@ -69,6 +69,8 @@ int saisieJoueur(jeu_t * jeu, SDL_Renderer* renderer, TTF_Font* font){
             jeu->joueurs[i].num = rand()%jeu->nbJoueur+1;
         }while(already_given(jeu->joueurs[i].num, jeu, i));
     }
+
+    
     return 0;
 }
 
