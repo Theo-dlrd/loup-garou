@@ -888,7 +888,7 @@ jeu_t* local_menu(SDL_Renderer* renderer, TTF_Font* font){
                     } 
                     else if (x >= rect_plus_lg.x && x <= rect_plus_lg.x + rect_plus_lg.w && y >= rect_plus_lg.y && y <= rect_plus_lg.y + rect_plus_lg.h){
                         jeu->nbLoupGarou=atoi(charLoupGarou);
-                        if(jeu->nbLoupGarou<jeu->nbJoueur/2){
+                        if(jeu->nbLoupGarou<jeu->nbJoueur){///2){
                             jeu->nbLoupGarou++;
                         }
                         itoa(jeu->nbLoupGarou,charLoupGarou);

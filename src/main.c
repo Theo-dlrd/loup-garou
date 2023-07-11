@@ -72,6 +72,32 @@ int saisieJoueur(jeu_t * jeu, SDL_Renderer* renderer, TTF_Font* font){
     return 0;
 }
 
+int reInit(jeu_t * jeu){
+    for(int i=0; i<jeu->nbJoueur; i++){
+        if(jeu->joueurs[i].nomIMG != NULL){
+            free(jeu->joueurs[i].nomIMG);
+            jeu->joueurs[i].nomIMG = NULL;
+        }
+    }
+
+    if(jeu->joueurs != NULL){
+        free(jeu->joueurs);
+        jeu->joueurs = NULL;
+    }
+    
+
+    if(jeu->nbVoleur>1){
+        free(jeu->piocheVoleur[0].nomIMG);
+        jeu->piocheVoleur[0].nomIMG = NULL;
+        free(jeu->piocheVoleur[1].nomIMG);
+        jeu->piocheVoleur[1].nomIMG = NULL;
+        free(jeu->piocheVoleur);
+        jeu->piocheVoleur = NULL;
+    }
+
+    return 0;
+}
+
 int destroyJeu(jeu_t * jeu){
     for(int i=0; i<jeu->nbJoueur; i++){
         if(jeu->joueurs[i].nom != NULL){
@@ -113,6 +139,7 @@ int main(){
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024);
     
     Mix_Music* music_menu = Mix_LoadMUS("../sound/music/menu.mp3");
+    
 
     TTF_Init();
     TTF_Font* font = NULL;
@@ -125,37 +152,36 @@ int main(){
     int exit = 0, rejouer = 0;
     jeu_t* jeu;
 
-    Mix_PlayMusic(music_menu, -1);
     while(!exit){
-        if(rejouer == 1){
-            Mix_PlayMusic(music_menu, -1);
-        }
-
+        Mix_VolumeMusic(MIX_MAX_VOLUME);
+        Mix_PlayMusic(music_menu, -1);
         jeu = menu(renderer, font); 
 
         if(jeu!=NULL){
             if(!saisieJoueur(jeu, renderer, font)){
-                if(!initJeu(jeu, renderer, font)){
-                    exit = 1;
-                    break;
-                }
+                do{
+                    if(rejouer){
+                        Mix_PlayMusic(music_menu, -1);
+                    }
 
-                Mix_HaltMusic();
+                    if(!initJeu(jeu, renderer, font)){
+                        exit = 1;
+                        break;
+                    }
 
-                play(jeu, renderer, font);
+                    //Mix_HaltMusic();
 
-                /*
-                if(rejouer(renderer, font)){
-                    if(jeu != NULL){
+                    rejouer = play(jeu, renderer, font);
+                    printf("%d\n", rejouer);
+                    if(rejouer){
+                        reInit(jeu);
+                    }
+                    else{
+                        destroyJeu(jeu);
                         free(jeu);
                         jeu = NULL;
                     }
-                }
-                else{
-                    exit = 1;
-                }
-                */
-               exit =1;
+                }while(rejouer);
             }
         }
         else{
