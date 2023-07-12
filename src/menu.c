@@ -51,7 +51,7 @@ int affAllPlayer(SDL_Renderer* renderer, TTF_Font* font, jeu_t * jeu){
     SDL_Surface *quit = TTF_RenderUTF8_Solid(font, "Quitter", whiteColor);
     SDL_Texture *txr_quit = SDL_CreateTextureFromSurface(renderer, quit);
     SDL_Rect rect_quit = {LONG_WIN/2 - 150, LARG_WIN-75, 100, 75};
-    SDL_FreeSurface(menu);
+    SDL_FreeSurface(quit);
 
     SDL_Surface *tab_noms[jeu->nbJoueur];
     SDL_Surface *tab_role[jeu->nbJoueur];

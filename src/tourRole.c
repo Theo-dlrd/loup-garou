@@ -48,6 +48,7 @@ int selectNom(jeu_t * jeu, SDL_Renderer * renderer,TTF_Font * font, Roles role){
     SDL_Rect rect_title;
     Mix_Chunk * lg_speed_up;
     SDL_Color couleur = whiteColor, gray = lightgrayColor;
+    Mix_Chunk *tir;
     if(role == LOUPGAROU){
         lg_speed_up = Mix_LoadWAV("../sound/voice/lg_design.wav");
         Mix_VolumeChunk(lg_speed_up, MIX_MAX_VOLUME/2); 
@@ -61,6 +62,7 @@ int selectNom(jeu_t * jeu, SDL_Renderer * renderer,TTF_Font * font, Roles role){
         rect_title.w = 250;
     }
     else if(role == CHASSEUR){
+        tir = Mix_LoadWAV("../sound/effects/tir.wav");
         couleur = blackColor;
         gray = grayColor;
         title = TTF_RenderUTF8_Solid(font, "Tour du Chasseur", couleur);
@@ -153,10 +155,9 @@ int selectNom(jeu_t * jeu, SDL_Renderer * renderer,TTF_Font * font, Roles role){
         SDL_Event event;
         while(SDL_PollEvent(&event)){
             delay = SDL_GetTicks()-tick;
-            if(role == LOUPGAROU && delay>=15000 && delay<=17000){
+            if(role == LOUPGAROU && delay>=20000 && delay<=21000){
                 printf("%d\n", delay);
                 Mix_PlayChannel(2, lg_speed_up, 0);
-                printf("Dépèche\n");
             }
             switch(event.type){
                 case SDL_QUIT: 
@@ -178,6 +179,10 @@ int selectNom(jeu_t * jeu, SDL_Renderer * renderer,TTF_Font * font, Roles role){
                         }
                     }
                     if(bouton_selected != -1  && x>=rect_confirmer.x && x<=rect_confirmer.x+rect_confirmer.w && y>=rect_confirmer.y && y<=rect_confirmer.y+rect_confirmer.h){
+                        if(role == CHASSEUR){
+                            Mix_PlayChannel(1,tir,0);
+                            while(Mix_Playing(1));
+                        }
                         run = 0;
                     }
                     if(x>=rect_back.x && x<=rect_back.x+rect_back.w && y>=rect_back.y && y<=rect_back.y+rect_back.h){
@@ -234,6 +239,9 @@ int selectNom(jeu_t * jeu, SDL_Renderer * renderer,TTF_Font * font, Roles role){
     SDL_DestroyTexture(txr_confirmer);
     SDL_DestroyTexture(txr_title);
     SDL_DestroyTexture(txr_info);
+    if(role == CHASSEUR){
+        Mix_FreeChunk(tir);
+    }
 
     return bouton_selected;
 }

@@ -302,10 +302,10 @@ SDL_Surface * LoadIMGFromRole(joueur_t * joueur){
     return NULL;
 }
 
-void affMortChasseur(jeu_t* jeu, SDL_Renderer * renderer, TTF_Font *font, joueur_t * joueur){
+void affMortChasseur(SDL_Renderer * renderer, TTF_Font *font, joueur_t * joueur){
     SDL_Surface *info = TTF_RenderUTF8_Solid(font, "Le chasseur a tué ce joueur", blackColor);
     SDL_Texture *txr_info = SDL_CreateTextureFromSurface(renderer, info);
-    SDL_Rect rect_info = {LONG_WIN/2-150,LARG_WIN/2-25,300,50};
+    SDL_Rect rect_info = {LONG_WIN/2-150,LARG_WIN/4-25,300,50};
     SDL_FreeSurface(info);
 
     SDL_Surface *img_mort = IMG_Load("../img/dos_carte.jpg");
@@ -316,6 +316,31 @@ void affMortChasseur(jeu_t* jeu, SDL_Renderer * renderer, TTF_Font *font, joueur
     SDL_Surface *mort = TTF_RenderUTF8_Solid(font, joueur->nom, blackColor);
     SDL_Texture *txr_mort = SDL_CreateTextureFromSurface(renderer, mort);
     SDL_Rect rect_mort = {rect_img_mort.x+rect_img_mort.w/2-10*strlen(joueur->nom),rect_img_mort.y+rect_img_mort.h,strlen(joueur->nom)*20,40};
+
+    int tick = SDL_GetTicks();
+    int delay = SDL_GetTicks() - tick;
+    while(delay<12000){
+        delay = SDL_GetTicks() - tick;
+
+        if(delay >= 5000 && delay <= 6000){
+            SDL_DestroyTexture(txr_img_mort);
+            img_mort = LoadIMGFromRole(joueur);
+            txr_img_mort = SDL_CreateTextureFromSurface(renderer, img_mort);
+            SDL_FreeSurface(img_mort);
+        }
+
+        SDL_SetRenderDrawColor(renderer,149,56,58,255);
+        SDL_RenderClear(renderer);
+        SDL_RenderCopy(renderer, txr_info, NULL, &rect_info);
+        if(delay>6000){
+            SDL_RenderCopy(renderer, txr_mort, NULL, &rect_mort);
+        }   
+        SDL_RenderCopy(renderer, txr_img_mort, NULL, &rect_img_mort);
+        SDL_RenderPresent(renderer);
+    }
+    SDL_DestroyTexture(txr_info);
+    SDL_DestroyTexture(txr_img_mort);
+    SDL_DestroyTexture(txr_mort);
 }
 
 void affMorts(jeu_t * jeu, SDL_Renderer * renderer, TTF_Font *font, mort_t * mortNuit){
@@ -643,17 +668,28 @@ void affMorts(jeu_t * jeu, SDL_Renderer * renderer, TTF_Font *font, mort_t * mor
 }
 
 void jour(jeu_t * jeu, SDL_Renderer * renderer, TTF_Font *font, mort_t * mortNuit){
+    Mix_Music * music_mort = Mix_LoadMUS("../sound/music/morts.mp3");
+    Mix_VolumeMusic(MIX_MAX_VOLUME);
+    Mix_FadeInMusic(music_mort, 0, 2000);
 
-    affMorts(renderer, font, jeu, mortNuit);
+    affMorts(jeu, renderer, font, mortNuit);
     
     if(mortNuit->tab_mort[0]->role == CHASSEUR || mortNuit->tab_mort[1]->role == CHASSEUR || mortNuit->tab_mort[2]->role == CHASSEUR){
         joueur_t * victimeChasseur = &jeu->joueurs[tourChasseur(jeu, renderer, font)];
         victimeChasseur->etat = MORT;
-        printf("%s\n", victimeChasseur->nom);
-        affMortChasseur(jeu, renderer, font, victimeChasseur);
+        affMortChasseur(renderer, font, victimeChasseur);
     }
 
-    vote();
+    Mix_FadeOutMusic(3000);
+
+    Mix_Music * music_vote = Mix_LoadMUS("../sound/music/vote.mp3");
+    Mix_VolumeMusic(MIX_MAX_VOLUME);
+    Mix_FadeInMusic(music_vote, 0, 2000);
+    
+
+    //vote();
+
+
 }
 
 void echanger(jeu_t * jeu, int i, int j){
