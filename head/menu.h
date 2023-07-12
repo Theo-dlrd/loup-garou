@@ -21,6 +21,6 @@ typedef struct elem_s{
 jeu_t* menu(SDL_Renderer* renderer, TTF_Font* font);
 char * menu_nom(SDL_Renderer* renderer, TTF_Font* font, int indice, jeu_t * jeu);
 char* itoa(int value, char* buffer);
-void * affAllPlayer(SDL_Renderer* renderer, TTF_Font* font, jeu_t * jeu);
+int affAllPlayer(SDL_Renderer* renderer, TTF_Font* font, jeu_t * jeu);
 
 #endif

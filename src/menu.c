@@ -17,7 +17,7 @@ int name_available(char * nom, jeu_t * jeu, int i){
     return 1;
 }
 
-void * affAllPlayer(SDL_Renderer* renderer, TTF_Font* font, jeu_t * jeu){
+int affAllPlayer(SDL_Renderer* renderer, TTF_Font* font, jeu_t * jeu){
     int ligne=1, nbLigne, iCol=0, ecart;
     int nbNonLoup = jeu->nbJoueur-jeu->nbLoupGarou;
     if(nbNonLoup >= 1 && nbNonLoup <= 6){
@@ -102,11 +102,11 @@ void * affAllPlayer(SDL_Renderer* renderer, TTF_Font* font, jeu_t * jeu){
                     break;
                 case SDL_MOUSEBUTTONUP:
                     SDL_GetMouseState(&x, &y);
-                    if(x>=rect_begin.x && x<=rect_begin.x+rect_begin.w && y>=rect_rejouer.y && y<=rect_rejouer.y+rect_rejouer.h){
+                    if(x>=rect_begin.x && x<=rect_begin.x+rect_begin.w && y>=rect_begin.y && y<=rect_begin.y+rect_begin.h){
                         retour = 1;
                         run = 0;
                     }
-                    else if(x>=rect_menu.x && x<=rect_menu.x+rect_menu.w && y>=rect_menu.y && y<=rect_menu.y+rect_menu.h){
+                    else if(x>=rect_quit.x && x<=rect_quit.x+rect_quit.w && y>=rect_quit.y && y<=rect_quit.y+rect_quit.h){
                         retour = 0;
                         run = 0;
                     }
@@ -133,6 +133,8 @@ void * affAllPlayer(SDL_Renderer* renderer, TTF_Font* font, jeu_t * jeu){
 
     Mix_FadeOutMusic(2000);
     while(Mix_PlayingMusic());
+
+    return retour;
 }
 
 char * menu_nom(SDL_Renderer* renderer, TTF_Font* font, int indice, jeu_t * jeu){
